@@ -45,7 +45,7 @@ app.get('/api/users/:id/favorites', async(req, res, next) => {
 //POST /api/users/:id/favorites - payload: a product_id returns the created favorite with a status code of 201
 app.post('/api/users/:id/favorites', async(req, res, next) => {
     try {
-        res.status(201).send(await createFavorite(req.body));
+        res.status(201).send(await createFavorite({user_id: req.params.id, product_id: req.body.product_id}));
     }
     catch(ex){
         next(ex);
@@ -77,11 +77,10 @@ const init = async()=> {
         createProduct({ name: 'pants'}),
         createProduct({ name: 'jackets'}),
         createProduct({ name: 'accessories'}),
+        
     ]);
-
     const users = await fetchUsers();
     console.log(users);
-
     const products = await fetchProducts();
     console.log(products);
 
@@ -91,14 +90,10 @@ const init = async()=> {
         createFavorite({ user_id: ethyl.id, product_id: shoes.id}),
         createFavorite({ user_id: lucy.id, product_id: accessories.id}),
       ]);
-    await Promise.all([
-
-    ]);
-
+    console.log(await fetchFavorites(moe.id));
 
     const port = process.env.PORT || 3000;
     app.listen(port, ()=> console.log(`listening on port ${port}`));
-
 };
   
   init();
