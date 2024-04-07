@@ -42,7 +42,7 @@ const createUser = async({ username, password })=> {
     return response.rows[0];
   };
 /*createProduct - creates a product in the database and returns the created record*/
-const createProducts = async({ name })=> {
+const createProduct = async({ name })=> {
     const SQL = `
       INSERT INTO products(id, name) VALUES($1, $2) RETURNING *
     `;
@@ -88,7 +88,6 @@ async function fetchFavorites(id) {
     return response.rows;
 };
 
-
 //destroyFavorite - deletes a favorite in the database
 async function destroyFavorite({id, user_id}) {
     const SQL = `
@@ -99,13 +98,11 @@ async function destroyFavorite({id, user_id}) {
 }
 
 
-
-
 module.exports = {
     client,
     createTables,
     createFavorite,
-    createProducts,
+    createProduct,
     createUser,
     fetchUsers,
     fetchProducts,

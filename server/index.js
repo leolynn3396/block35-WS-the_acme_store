@@ -3,7 +3,7 @@ const {
     client,
     createTables,
     createFavorite,
-    createProducts,
+    createProduct,
     createUser,
     fetchUsers,
     fetchProducts,
@@ -53,70 +53,48 @@ app.post('/api/users/:id/favorites', async(req, res, next) => {
 });
 
 //DELETE /api/users/:userId/favorites/:id - deletes a favorite for a user, returns nothing with a status code of 204
-
-app.get('/api/restaurants', async(req, res, next) => {
-    try{
-        res.send(await fetchRestaurants());
-    }catch(ex){
-        next(ex);
+app.delete('/api/users/:userId/favorites/:id', async(req, res, next)=> {
+    try {
+      await destroyFavorite({ id: req.params.id, user_id: req.params.userId });
+      res.sendStatus(204);
     }
-});
-app.get('/api/reservations', async(req, res, next) => {
-    try{
-        res.send(await fetchReservations())
-    }catch(ex){
-        next(ex);
+    catch(ex){
+      next(ex);
     }
-});
-
-//POST
-
-app.post('/api/customers/:id/reservations', async(req, res, next) => {
-    try{
-        res.status(201).send(await createReservation(req.body));
-        } catch(ex){
-            next(ex);
-        }
-});
-
-//DELETE
-app.delete('/api/customers/:customer_id/reservations/:id', async(req, res, next) => {
-    try{
-        await destroyReservation(req.params.id);
-        res.sendStatus(204);
-    }catch(ex){
-        next(ex);
-    }  
-});  
-
+  });
+  
 
 const init = async()=> {
     await client.connect();
     console.log('connected to database');
     await createTables();
     console.log('tables created');
-    const [ling, amy, josh, HDL, DolarShop, ChengduMemory] = 
-    await Promise.all([
-        createCustomer('ling'),
-        createCustomer('amy'),
-        createCustomer('josh'),
-        createRestaurant('HDL'),
-        createRestaurant('DolarShop'),
-        createRestaurant('ChengduMemory'),
+    const [moe, lucy, ethyl, shoes, pants, jackets, accessories] = await Promise.all([
+        createUser({ username: 'moe', password: 's3cr3t' }),
+        createUser({ username: 'lucy', password: 's3cr3t!!' }),
+        createUser({ username: 'ethyl', password: 'shhh' }),
+        createProduct({ name: 'shoes'}),
+        createProduct({ name: 'pants'}),
+        createProduct({ name: 'jackets'}),
+        createProduct({ name: 'accessories'}),
     ]);
-    console.log(`ling has an id of ${ling.id}`);
-    console.log(`HDL has an id of ${HDL.id}`);
-    console.log(await fetchCustomers());
-    console.log(await fetchRestaurants());
+
+    const users = await fetchUsers();
+    console.log(users);
+
+    const products = await fetchProducts();
+    console.log(products);
+
+    const favorites = await Promise.all([
+        createFavorite({ user_id: moe.id, product_id: accessories.id}),
+        createFavorite({ user_id: moe.id, product_id: jackets.id}),
+        createFavorite({ user_id: ethyl.id, product_id: shoes.id}),
+        createFavorite({ user_id: lucy.id, product_id: accessories.id}),
+      ]);
     await Promise.all([
-        createReservation({customer_id: ling.id, restaurant_id: HDL.id, date: '04/01/2024', party_count: '6'}),
-        createReservation({customer_id: ling.id, restaurant_id: DolarShop.id, date: '04/15/2024', party_count: '7'}),
-        createReservation({customer_id: amy.id, restaurant_id: ChengduMemory.id, date: '07/04/2024', party_count: '8'})
+
     ]);
-    const reservations = await fetchReservations();
-    console.log(reservations);
-    await destroyReservation(reservations[0].id);
-    console.log(await fetchReservations());
+
 
     const port = process.env.PORT || 3000;
     app.listen(port, ()=> console.log(`listening on port ${port}`));
