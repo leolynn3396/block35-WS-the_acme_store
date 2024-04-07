@@ -2,6 +2,7 @@
 const pg = require('pg');
 const client = new pg.Client(process.env.DATABASE_URL || 'postgres://localhost/acme_store_db');
 const uuid = require('uuid');
+const bcrypt = require('bcrypt');
 
 //createTables method - drops and creates the tables for your application
 async function createTables() {
@@ -37,7 +38,7 @@ const createUser = async({ username, password })=> {
     const SQL = `
       INSERT INTO users(id, username, password) VALUES($1, $2, $3) RETURNING *
     `;
-    const response = await client.query(SQL, [uuid.v4(), username, password]);
+    const response = await client.query(SQL, [uuid.v4(), username, await bcrypt.hash(password, 5)]);
     return response.rows[0];
   };
 /*createProduct - creates a product in the database and returns the created record*/
@@ -88,9 +89,13 @@ async function fetchFavorites(id) {
 };
 
 
-//destroyFavorite - deletes a favorite in the database*/
-async function destroyFavorite() {
-
+//destroyFavorite - deletes a favorite in the database
+async function destroyFavorite({id, user_id}) {
+    const SQL = `
+    DELETE FROM favorites
+    WHERE id = $1 AND user_id = $2
+  `;
+  await client.query(SQL, [ id, user_id ]);
 }
 
 

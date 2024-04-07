@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/leolynn3396/block35-WS-the_acme_store#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.19.2",
     "nodemon": "^3.1.0",
     "pg": "^8.11.5",
